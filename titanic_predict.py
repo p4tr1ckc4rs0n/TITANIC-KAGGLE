@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 
 import pandas as pd
-import scipy
+import argparse
 from sklearn import linear_model
 import csv
+
+parser = argparse.ArgumentParser(description='dataset inputs for titanic kaggle comp')
+
+parser.add_argument('-tr','--train',dest='train_data',help='path to training data')
+
+parser.add_argument('-te','--test',dest='test_data',help='path to test data')
+
+args = parser.parse_args()
 
 def load_data(input_data):
     
@@ -11,19 +19,26 @@ def load_data(input_data):
 	in_data = pd.read_csv(input_data)
 
 	# define features
-	f_ = ['Survived','Pclass','Sex','Age','PassengerId']
+	f_ = ['Survived','Pclass','Sex','Age','Embarked','SibSp','PassengerId']
 
 	# select features
 	if "train" in input_data:
-		data = in_data[f_[0:4]]
+		data = in_data[f_[0:6]]
 	else:
-		data = in_data[f_[1:5]]
+		data = in_data[f_[1:7]]
         
 	# change male to 1 and female to 0
-	data['Sex'] = data['Sex'].apply(lambda sex: 1 if sex=='male' else 0)
+	data.loc[data['Sex'] == 'male', 'Sex'] = 1
+	data.loc[data['Sex'] == 'female', 'Sex'] = 0
+
+	# change embarked (S,C,Q) to (0,1,2)
+	data['Embarked'] = data['Embarked'].fillna('S')
+	data.loc[data['Embarked'] == 'S', 'Embarked'] = 0
+	data.loc[data['Embarked'] == 'C', 'Embarked'] = 1
+	data.loc[data['Embarked'] == 'Q', 'Embarked'] = 2
 
 	# fill nan value with mean age
-	data['Age'] = data['Age'].fillna(data_train['Age'].mean())
+	data['Age'] = data['Age'].fillna(data['Age'].median())
 
 	return data
 
@@ -48,8 +63,15 @@ def logit_model(X_train,Y_train,test_data):
 
 def main():
 	# load training data
-	titanic_train = load_data(args.train)
+	titanic_train = load_data(args.train_data)
 	# load test data
-	titanic_test = load_data(args.test)
-	# fit model
+	titanic_test = load_data(args.test_data)
+	# fit and test model
 	logit_model(titanic_train,titanic_train['Survived'],titanic_test)
+
+	print "###"
+	print "Model trained and tested. See results.csv"
+	print "###"
+
+if __name__ == "__main__":
+    main()
