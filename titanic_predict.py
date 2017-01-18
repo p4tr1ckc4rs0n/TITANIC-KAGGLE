@@ -6,15 +6,12 @@ from sklearn import linear_model
 import csv
 
 parser = argparse.ArgumentParser(description='dataset inputs for titanic kaggle comp')
-
 parser.add_argument('-tr','--train',dest='train_data',help='path to training data')
-
 parser.add_argument('-te','--test',dest='test_data',help='path to test data')
 
 args = parser.parse_args()
 
 def load_data(input_data):
-    
 	# load data
 	in_data = pd.read_csv(input_data)
 
@@ -43,7 +40,6 @@ def load_data(input_data):
 	return data
 
 def logit_model(X_train,Y_train,test_data):
-    
 	# instantiate model
 	logreg = linear_model.LogisticRegression()
 
